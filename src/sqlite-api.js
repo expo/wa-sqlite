@@ -58,8 +58,8 @@ export function Factory(Module) {
   /**
    * Concatenate 32-bit numbers and return as number or BigInt, depending
    * on the value.
-   * @param {number} lo32 
-   * @param {number} hi32 
+   * @param {number} lo32
+   * @param {number} hi32
    * @returns {number|bigint}
    */
   const cvt32x2AsSafe = (function() {
@@ -245,7 +245,7 @@ export function Factory(Module) {
       return check(fname, result, mapStmtToDB.get(stmt));
     };
   })();
-  
+
   sqlite3.close = (function() {
     const fname = 'sqlite3_close';
     const f = Module.cwrap(fname, ...decl('n:n'), { async });
@@ -385,7 +385,7 @@ export function Factory(Module) {
 
   sqlite3.create_function = function(db, zFunctionName, nArg, eTextRep, pApp, xFunc, xStep, xFinal) {
     verifyDatabase(db);
-    
+
     // Convert SQLite callback arguments to JavaScript-friendly arguments.
     function adapt(f) {
       return f instanceof AsyncFunction ?
@@ -637,7 +637,7 @@ export function Factory(Module) {
     const result = Module.set_authorizer(db, adapt(xAuth), pApp);
     return check('sqlite3_set_authorizer', result, db);
   };;
-  
+
   sqlite3.sql = (function() {
     const fname = 'sqlite3_sql';
     const f = Module.cwrap(fname, ...decl('n:s'));
@@ -670,7 +670,7 @@ export function Factory(Module) {
         onFinally.push(() => Module._sqlite3_free(pzHead));
         Module.HEAPU8.set(utf8, pzHead);
         Module.HEAPU8[pzEnd - 1] = 0;
-  
+
         // Use extra space for the statement handle and SQL tail pointer.
         const pStmt = pzHead + allocSize - 8;
         const pzTail = pzHead + allocSize - 4;
@@ -684,7 +684,7 @@ export function Factory(Module) {
           stmt = 0;
         }
         onFinally.push(maybeFinalize);
-        
+
         // Loop over statements.
         Module.setValue(pzTail, pzHead, '*');
         do {
@@ -707,7 +707,7 @@ export function Factory(Module) {
           if (rc !== SQLite.SQLITE_OK) {
             check('sqlite3_prepare_v3', rc, db);
           }
-          
+
           stmt = Module.getValue(pStmt, '*');
           if (stmt) {
             mapStmtToDB.set(stmt, db);
@@ -873,7 +873,7 @@ export function Factory(Module) {
         await Promise.all(Module.retryOps);
         Module.retryOps = [];
       }
-      
+
       rc = await f();
 
       // Retry on failure with new pending retry operations.
