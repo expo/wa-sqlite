@@ -300,6 +300,15 @@ declare interface SQLiteAPI {
   bind_parameter_count(stmt: number): number;
 
   /**
+   * Get index of a parameter with a given name
+   * @see https://www.sqlite.org/c3ref/bind_parameter_index.html
+   * @param stmt prepared statement pointer
+   * @param name name of the parameter
+   * @returns index of the parameter
+   */
+  bind_parameter_index(stmt: number, name: string): number;
+
+  /**
    * Get name of bound parameter
    *
    * Note that binding indices begin with 1.

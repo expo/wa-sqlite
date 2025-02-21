@@ -205,6 +205,16 @@ export function Factory(Module) {
     };
   })();
 
+  sqlite3.bind_parameter_index = (function () {
+    const fname = "sqlite3_bind_parameter_index";
+    const f = Module.cwrap(fname, ...decl("ns:n"));
+    return function (stmt, name) {
+      verifyStatement(stmt);
+      const result = f(stmt, name);
+      return result;
+    };
+  })();
+
   sqlite3.bind_parameter_name = (function() {
     const fname = 'sqlite3_bind_parameter_name';
     const f = Module.cwrap(fname, ...decl('n:s'));
