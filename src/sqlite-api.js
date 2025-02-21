@@ -865,9 +865,14 @@ export function Factory(Module) {
 
   function check(fname, result, db = null, allowed = [SQLite.SQLITE_OK]) {
     if (allowed.includes(result)) return result;
-    const message = db ?
-      Module.ccall('sqlite3_errmsg', 'string', ['number'], [db]) :
-      fname;
+    let message;
+    if (db) {
+      const errcode = Module.ccall('sqlite3_errcode', 'number', ['number'], [db]);
+      const errmsg = Module.ccall('sqlite3_errmsg', 'string', ['number'], [db]);
+      message = 'Error code ' + errcode + ': ' + errmsg;
+    } else {
+      message = fname;
+    }
     throw new SQLiteError(message, result);
   }
 
