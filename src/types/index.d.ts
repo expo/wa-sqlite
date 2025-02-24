@@ -517,6 +517,16 @@ declare interface SQLiteAPI {
   data_count(stmt: number): number;
 
   /**
+   * Deserialize a database from a byte array
+   * @see https://www.sqlite.org/c3ref/deserialize.html
+   * @param db database pointer
+   * @param schema schema name ("main" or "temp")
+   * @param data byte array containing serialized database
+   * @returns SQLITE_OK (throws exception on error)
+   */
+  deserialize(db: number, schema: string, data: Uint8Array): number;
+
+  /**
    * One-step query execution interface
    *
    * The implementation of this function uses {@link row}, which makes a
@@ -693,6 +703,15 @@ declare interface SQLiteAPI {
     * @returns row data
     */
   row(stmt: number): Array<SQLiteCompatibleType|null>;
+
+  /**
+   * Serialize a database to a byte array
+   * @see https://www.sqlite.org/c3ref/serialize.html
+   * @param db database pointer
+   * @param schema schema name ("main" or "temp")
+   * @returns serialized database as Uint8Array, or null on error
+   */
+  serialize(db: number, schema: string): Uint8Array | null;
 
   /**
    * Register a callback function that is invoked to authorize certain SQL statement actions.
@@ -1102,6 +1121,10 @@ declare module 'wa-sqlite/src/sqlite-constants.js' {
   export const SQLITE_PREPARE_PERSISTENT: 0x01;
   export const SQLITE_PREPARE_NORMALIZED: 0x02;
   export const SQLITE_PREPARE_NO_VTAB: 0x04;
+  export const SQLITE_DESERIALIZE_FREEONCLOSE: 1;
+  export const SQLITE_DESERIALIZE_RESIZEABLE: 2;
+  export const SQLITE_DESERIALIZE_READONLY: 4;
+  export const SQLITE_SERIALIZE_NOCOPY: 0x001;
 }
 
 declare module 'wa-sqlite' {

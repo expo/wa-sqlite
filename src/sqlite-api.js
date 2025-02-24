@@ -425,6 +425,20 @@ export function Factory(Module) {
     };
   })();
 
+  sqlite3.deserialize = (function() {
+    const fname = 'sqlite3_deserialize';
+    const f = Module.cwrap(fname, ...decl('nsnnnn:n'));
+    return function(db, schema, data) {
+      const flags = SQLite.SQLITE_DESERIALIZE_RESIZEABLE | SQLite.SQLITE_DESERIALIZE_FREEONCLOSE;
+      verifyDatabase(db);
+      const size = data.byteLength;
+      const ptr = Module._sqlite3_malloc(size);
+      Module.HEAPU8.subarray(ptr).set(data);
+      const result = f(db, schema, ptr, size, size, flags);
+      return check(fname, result, db);
+    };
+  })();
+
   sqlite3.exec = async function(db, sql, callback) {
     for await (const stmt of sqlite3.statements(db, sql)) {
       let columns;
@@ -633,6 +647,26 @@ export function Factory(Module) {
     }
     return row;
   };
+
+  sqlite3.serialize = (function() {
+    const fname = 'sqlite3_serialize';
+    const f = Module.cwrap(fname, ...decl('nsnn:n'));
+    return function(db, schema) {
+      verifyDatabase(db);
+      const size = tmpPtr[0];
+      const flags = 0;
+      const ptr = f(db, schema, size, flags);
+      if (!ptr) {
+        check(fname, SQLite.SQLITE_ERROR, db);
+        return null;
+      }
+      const bufferSize = Module.getValue(size, '*');
+      const buffer = Module.HEAPU8.subarray(ptr, ptr + bufferSize);
+      const result = new Uint8Array(buffer);
+      Module._sqlite3_free(ptr);
+      return result;
+    };
+  })();
 
   sqlite3.set_authorizer = function(db, xAuth, pApp) {
     verifyDatabase(db);
