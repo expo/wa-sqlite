@@ -554,6 +554,14 @@ declare interface SQLiteAPI {
   get_autocommit(db: number): number;
 
   /**
+   * Get last insert rowid
+   * @see https://www.sqlite.org/c3ref/last_insert_rowid.html
+   * @param db database pointer
+   * @returns last insert rowid
+   */
+  last_insert_rowid(db: number): number | bigint;
+
+  /**
    * Get SQLite library version
    * @see https://www.sqlite.org/c3ref/libversion.html
    * @returns version string, e.g. '3.35.5'

@@ -461,6 +461,16 @@ export function Factory(Module) {
     };
   })();
 
+  sqlite3.last_insert_rowid = (function() {
+    const fname = 'sqlite3_last_insert_rowid';
+    const f = Module.cwrap(fname, ...decl('n:n'));
+    return function(db) {
+      const lo32 = f(db);
+      const hi32 = Module.getTempRet0();
+      return cvt32x2AsSafe(lo32, hi32);
+    };
+  })();
+
   sqlite3.libversion = (function() {
     const fname = 'sqlite3_libversion';
     const f = Module.cwrap(fname, ...decl(':s'));
