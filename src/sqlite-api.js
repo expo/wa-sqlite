@@ -512,6 +512,16 @@ export function Factory(Module) {
     };
   })();
 
+  sqlite3.next_stmt = (function() {
+    const fname = 'sqlite3_next_stmt';
+    const f = Module.cwrap(fname, ...decl('nn:n'));
+    return function(db, stmt) {
+      verifyDatabase(db);
+      const result = f(db, stmt || 0);
+      return result;
+    };
+  })();
+
   sqlite3.open_v2 = (function() {
     const fname = 'sqlite3_open_v2';
     const f = Module.cwrap(fname, ...decl('snnn:n'), { async });

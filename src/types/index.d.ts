@@ -599,6 +599,15 @@ declare interface SQLiteAPI {
     newVal: number): number;
 
   /**
+   * Return the next prepared statement after stmt associated with database db
+   * @see https://www.sqlite.org/c3ref/next_stmt.html
+   * @param db database pointer
+   * @param stmt statement pointer (or 0/null to get first statement)
+   * @returns pointer to the next prepared statement or 0 if no more exist
+   */
+  next_stmt(db: number, stmt: number | null): number;
+
+  /**
    * Opening a new database connection.
    *
    * Note that this function differs from the C API in that it
