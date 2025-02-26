@@ -436,6 +436,16 @@ export function Factory(Module) {
     };
   })();
 
+  sqlite3.db_filename = (function() {
+    const fname = 'sqlite3_db_filename';
+    const f = Module.cwrap(fname, ...decl('ns:s'));
+    return function(db, schema) {
+      verifyDatabase(db);
+      const result = f(db, schema);
+      return result;
+    };
+  })();
+
   sqlite3.deserialize = (function() {
     const fname = 'sqlite3_deserialize';
     const f = Module.cwrap(fname, ...decl('nsnnnn:n'));

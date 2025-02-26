@@ -526,6 +526,15 @@ declare interface SQLiteAPI {
   data_count(stmt: number): number;
 
   /**
+   * Return the filename for a database connection and schema
+   * @see https://www.sqlite.org/c3ref/db_filename.html
+   * @param db database pointer
+   * @param schema schema name ("main" or "temp")
+   * @returns filename associated with the database, or null if not found
+   */
+  db_filename(db: number, schema: string): string | null;
+
+  /**
    * Deserialize a database from a byte array
    * @see https://www.sqlite.org/c3ref/deserialize.html
    * @param db database pointer
