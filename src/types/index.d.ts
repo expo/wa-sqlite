@@ -180,6 +180,22 @@ declare interface SQLitePrepareOptions {
  */
 declare interface SQLiteAPI {
   /**
+   * Copy entire database from source to destination
+   * @see https://www.sqlite.org/c3ref/backup_finish.html
+   * @param destDb destination database connection
+   * @param destName destination database name ("main" or "temp")
+   * @param srcDb source database connection
+   * @param srcName source database name ("main" or "temp")
+   * @returns Promise resolving to SQLITE_OK (throws exception on error)
+   */
+  backup(
+    destDb: number,
+    destName: string,
+    srcDb: number,
+    srcName: string
+  ): Promise<number>;
+
+  /**
    * Bind a collection of values to a statement
    *
    * This convenience function binds values from either an array or object

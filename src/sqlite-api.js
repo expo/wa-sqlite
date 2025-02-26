@@ -93,6 +93,27 @@ export function Factory(Module) {
     }
   }
 
+  sqlite3.backup = (function() {
+    const init = Module.cwrap('sqlite3_backup_init', ...decl('nsns:n'));
+    const step = Module.cwrap('sqlite3_backup_step', ...decl('nn:n'));
+    const finish = Module.cwrap('sqlite3_backup_finish', ...decl('n:n'));
+
+    return async function(destDb, destName, srcDb, srcName) {
+      verifyDatabase(destDb);
+      verifyDatabase(srcDb);
+
+      const backup = init(destDb, destName, srcDb, srcName);
+      if (!backup) {
+        check('sqlite3_backup_init', SQLite.SQLITE_ERROR, destDb);
+        return;
+      }
+
+      step(backup, -1);
+      const result = finish(backup);
+      return check('sqlite3_backup_finish', result, destDb);
+    };
+  })();
+
   sqlite3.bind_collection = function(stmt, bindings) {
     verifyStatement(stmt);
     const isArray = Array.isArray(bindings);
