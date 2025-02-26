@@ -428,6 +428,15 @@ declare interface SQLiteAPI {
    */
   column_int64(stmt: number, i: number): bigint;
 
+  /**
+   * Extract a column value from a row after a prepared statment {@link step}
+   * @see https://www.sqlite.org/c3ref/column_blob.html
+   * @param stmt prepared statement pointer
+   * @param i column index
+   * @returns column value
+   */
+  column_int_safe(stmt: number, i: number): number | bigint;
+
    /**
    * Get a column name for a prepared statement
    * @see https://www.sqlite.org/c3ref/column_blob.html

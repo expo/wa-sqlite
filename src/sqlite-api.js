@@ -354,6 +354,17 @@ export function Factory(Module) {
     };
   })();
 
+  sqlite3.column_int_safe = (function() {
+    const fname = 'sqlite3_column_int64';
+    const f = Module.cwrap(fname, ...decl('nn:n'));
+    return function(stmt, iCol) {
+      verifyStatement(stmt);
+      const lo32 = f(stmt, iCol);
+      const hi32 = Module.getTempRet0();
+      return cvt32x2AsSafe(lo32, hi32);
+    };
+  })();
+
   sqlite3.column_name = (function() {
     const fname = 'sqlite3_column_name';
     const f = Module.cwrap(fname, ...decl('nn:s'));
