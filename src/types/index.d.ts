@@ -161,7 +161,7 @@ declare interface SQLitePrepareOptions {
  * the corresponding Javascript wrapper will throw an exception with a
  * `code` property on an error.
  *
- * Note that a few functions return a Promise in order to accomodate
+ * Note that a few functions return a Promise in order to accommodate
  * either a synchronous or asynchronous SQLite build, generally those
  * involved with opening/closing a database or executing a statement.
  *
