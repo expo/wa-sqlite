@@ -18,6 +18,19 @@ export class SQLiteError extends Error {
 const async = true;
 
 /**
+ * Views changeset input as bytes without copying. Accepts an `ArrayBuffer`
+ * or any typed array view over one.
+ * @param {ArrayBuffer|ArrayBufferView} changeset
+ * @returns {Uint8Array}
+ */
+function asBytes(changeset) {
+  if (changeset instanceof Uint8Array) return changeset;
+  return ArrayBuffer.isView(changeset)
+    ? new Uint8Array(changeset.buffer, changeset.byteOffset, changeset.byteLength)
+    : new Uint8Array(changeset);
+}
+
+/**
  * Builds a Javascript API from the Emscripten module. This API is still
  * low-level and closely corresponds to the C API exported by the module,
  * but differs in some specifics like throwing exceptions on errors.
@@ -975,9 +988,10 @@ export function Factory(Module) {
     const f = Module.cwrap(fname, ...decl('nnnnnn:n'));
     return function (db, changeset) {
       verifyDatabase(db);
-      const size = changeset.byteLength;
+      const bytes = asBytes(changeset);
+      const size = bytes.byteLength;
       const buffer = Module._sqlite3_malloc(size);
-      Module.HEAPU8.subarray(buffer).set(changeset);
+      Module.HEAPU8.subarray(buffer).set(bytes);
       const onConflict = () => {
         return SQLite.SQLITE_CHANGESET_REPLACE;
       };
@@ -991,9 +1005,10 @@ export function Factory(Module) {
     const fname = 'sqlite3changeset_invert';
     const f = Module.cwrap(fname, ...decl('nnnn:n'));
     return function (changeset) {
-      const inSize = changeset.byteLength;
+      const bytes = asBytes(changeset);
+      const inSize = bytes.byteLength;
       const inBuffer = Module._sqlite3_malloc(inSize);
-      Module.HEAPU8.subarray(inBuffer).set(changeset);
+      Module.HEAPU8.subarray(inBuffer).set(bytes);
       const outSize = tmpPtr[0];
       const outBuffer = tmpPtr[1];
       const result = f(inSize, inBuffer, outSize, outBuffer);
@@ -1001,9 +1016,8 @@ export function Factory(Module) {
       check(fname, result);
       const bufferSize = Module.getValue(outSize, '*');
       const bufferPtr = Module.getValue(outBuffer, '*');
-      const buffer = Module.HEAPU8.subarray(bufferPtr, bufferPtr + bufferSize);
-      const inverted = new Uint8Array(buffer);
-      Module._sqlite3_free(outBuffer);
+      const inverted = Module.HEAPU8.slice(bufferPtr, bufferPtr + bufferSize).buffer;
+      Module._sqlite3_free(bufferPtr);
       return inverted;
     };
   })();
@@ -1056,9 +1070,8 @@ export function Factory(Module) {
       check(fname, result);
       const size = Module.getValue(bufferSize, '*');
       const bufferPtr = Module.getValue(ptr, '*');
-      const buffer = Module.HEAPU8.subarray(bufferPtr, bufferPtr + size);
-      const changeset = new Uint8Array(buffer);
-      Module._sqlite3_free(ptr);
+      const changeset = Module.HEAPU8.slice(bufferPtr, bufferPtr + size).buffer;
+      Module._sqlite3_free(bufferPtr);
       return changeset;
     };
   })();
@@ -1089,10 +1102,9 @@ export function Factory(Module) {
 
       const outSizeValue = Module.getValue(outSize, '*');
       const outBufferPtr = Module.getValue(outBuffer, '*');
-      const inverted = Module.HEAPU8.subarray(outBufferPtr, outBufferPtr + outSizeValue);
-      const invertedArray = new Uint8Array(inverted);
-      Module._sqlite3_free(outBuffer);
-      return invertedArray;
+      const inverted = Module.HEAPU8.slice(outBufferPtr, outBufferPtr + outSizeValue).buffer;
+      Module._sqlite3_free(outBufferPtr);
+      return inverted;
     };
   })();
 

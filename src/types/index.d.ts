@@ -954,15 +954,15 @@ declare interface SQLiteAPI {
    * @param changeset changeset to apply
    * @returns `SQLITE_OK` (throws exception on error)
    */
-  changeset_apply(db: number, changeset: Uint8Array): number;
+  changeset_apply(db: number, changeset: ArrayBuffer | ArrayBufferView): number;
 
   /**
    * Invert a changeset
    * @see https://www.sqlite.org/session/sqlite3changeset_invert.html
    * @param changeset changeset to invert
-   * @returns inverted changeset
+   * @returns inverted changeset as ArrayBuffer
    */
-  changeset_invert(changeset: Uint8Array): Uint8Array;
+  changeset_invert(changeset: ArrayBuffer | ArrayBufferView): ArrayBuffer;
 
   /**
    * Create a new session object
@@ -1000,17 +1000,17 @@ declare interface SQLiteAPI {
    * Generate a changeset from a session object
    * @see https://www.sqlite.org/session/sqlite3session_changeset.html
    * @param session session pointer
-   * @returns changeset as Uint8Array
+   * @returns changeset as ArrayBuffer
    */
-  session_changeset(session: number): Uint8Array;
+  session_changeset(session: number): ArrayBuffer;
 
   /**
    * Generate an inverted changeset from a session object
    * This is a convenience function that combines session_changeset and changeset_invert
    * @param session session pointer
-   * @returns inverted changeset as Uint8Array
+   * @returns inverted changeset as ArrayBuffer
    */
-  session_changeset_inverted(session: number): Uint8Array;
+  session_changeset_inverted(session: number): ArrayBuffer;
 }
 
 /** @ignore */
