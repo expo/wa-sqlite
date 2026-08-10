@@ -28,6 +28,7 @@ export function Factory(Module) {
   /** @type {SQLiteAPI} */ const sqlite3 = {};
 
   Module.retryOps = [];
+  Module.pendingOps = [];
   const sqliteFreeAddress = Module._getSqliteFree();
 
   // Allocate some space for 32-bit returned values.
@@ -1113,18 +1114,32 @@ export function Factory(Module) {
   // succeed.
   async function retry(f) {
     let rc;
-    do {
+    for (let retryCount = 0; retryCount < 2; ++retryCount) {
       // Wait for all pending retry operations to complete. This is
       // normally empty on the first loop iteration.
       if (Module.retryOps.length) {
-        await Promise.all(Module.retryOps);
-        Module.retryOps = [];
+        try { 
+          await Promise.all(Module.retryOps);
+        } finally {
+          Module.retryOps = [];
+        }
       }
 
       rc = await f();
-
-      // Retry on failure with new pending retry operations.
-    } while (rc && Module.retryOps.length);
+      if (rc === SQLite.SQLITE_OK || Module.retryOps.length === 0) {
+        if (Module.pendingOps.length) {
+          try {
+            await Promise.all(Module.pendingOps);
+          } catch (e) {
+            console.error('Error in pendingOps:', e);
+            return e.code || SQLite.SQLITE_ERROR;
+          } finally {
+            Module.pendingOps = [];
+          }
+        }
+        return rc;
+      }
+    }
     return rc;
   }
 
