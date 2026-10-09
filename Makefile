@@ -143,6 +143,9 @@ cache/$(EXTENSION_FUNCTIONS):
 	curl -LsSf '$(EXTENSION_FUNCTIONS_URL)' -o $@
 
 ## deps
+.PHONY: deps
+deps: deps/$(SQLITE_VERSION)/sqlite3.c deps/$(EXTENSION_FUNCTIONS)
+
 .PHONY: clean-deps
 clean-deps:
 	rm -rf deps
