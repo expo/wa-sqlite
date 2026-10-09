@@ -388,6 +388,24 @@ export function api_statements(context) {
       expect(rc).toEqual(SQLite.SQLITE_OK);
     });
 
+    it('should keep the connection usable after a failed close', async function() {
+      let stmt;
+      for await (const s of i(sqlite3.statements(db, 'SELECT 1', { unscoped: true }))) {
+        if (s) {
+          stmt = s;
+        }
+      }
+      expect(stmt).toBeGreaterThan(0);
+
+      await expectAsync(sqlite3.close(db)).toBeRejectedWithError(/unfinalized statements/);
+      await expectAsync(sqlite3.exec(db, 'SELECT 1')).toBeResolvedTo(SQLite.SQLITE_OK);
+
+      await sqlite3.finalize(stmt);
+      await expectAsync(sqlite3.close(db)).toBeResolvedTo(SQLite.SQLITE_OK);
+
+      db = await sqlite3.open_v2('demo');
+    });
+
     it('should clear bindings', async function() {
       let rc;
   
